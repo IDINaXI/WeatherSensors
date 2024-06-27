@@ -1,2 +1,9 @@
-package com.wethersensor.wethersensor;public class SchedulingConfig {
+package com.wethersensor.wethersensor;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+@Configuration
+@EnableScheduling
+public class SchedulingConfig {
 }

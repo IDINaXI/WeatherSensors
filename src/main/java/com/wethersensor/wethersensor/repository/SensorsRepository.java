@@ -3,10 +3,13 @@ package com.wethersensor.wethersensor.repository;
 import com.wethersensor.wethersensor.model.Sensor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface SensorsRepository extends JpaRepository<Sensor, Long> {
-    Sensor findSensorBy_name(String _name);
-    void deleteBy_name(String _name);
-    Sensor findSensorBy_uuid(String _uuid);
+    Sensor findSensorByName(String name);
+    void deleteByName(String name);
+    Sensor findSensorByUuid(String uuid);
+    List<Sensor> findByActiveTrue();
 }
 
 

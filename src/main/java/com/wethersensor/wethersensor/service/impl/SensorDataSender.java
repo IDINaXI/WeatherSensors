@@ -43,7 +43,7 @@ public class SensorDataSender implements SensorDataService {
                         double randomValue = ThreadLocalRandom.current().nextDouble(-100, 100);
                         boolean isRaining = new Random().nextBoolean();
 
-                        String sensorKey = sensor.get_uuid();
+                        String sensorKey = sensor.getUuid();
 
                         String json = String.format(Locale.ENGLISH, "{\"value\": %.2f, \"raining\": %b}", randomValue, isRaining);
                         System.out.println("Отправляемый JSON для сенсора " + sensorKey + ": " + json);
@@ -57,8 +57,7 @@ public class SensorDataSender implements SensorDataService {
                         System.out.println("Sensor " + sensorKey + " - HTTP Status Code: " + statusCode);
 
                         if (statusCode != 201) {
-                            System.err.println("Ошибка при отправке данных для сенсора " + sensorKey + ": " + response.getStatusLine());
-                            // Логирование тела ответа
+                            System.err.println("Ответ при отправке данных для сенсора " + sensorKey + ": " + response.getStatusLine());
                             HttpEntity entity = response.getEntity();
                             if (entity != null) {
                                 String responseString = EntityUtils.toString(entity, StandardCharsets.UTF_8);
@@ -69,7 +68,7 @@ public class SensorDataSender implements SensorDataService {
                         int randomInterval = ThreadLocalRandom.current().nextInt(3000, 15000);
                         Thread.sleep(randomInterval);
                     } catch (IOException | InterruptedException e) {
-                        System.err.println("Ошибка при выполнении HTTP-запроса: " + e.getMessage());
+                        System.err.println("Ответ при выполнении HTTP-запроса: " + e.getMessage());
                     } catch (Exception e) {
                         System.err.println("Непредвиденная ошибка: " + e.getMessage());
                         e.printStackTrace();

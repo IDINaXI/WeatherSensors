@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -30,11 +29,6 @@ public class Server {
     @Autowired
     private final MeasurementRepository measurementRepository;
 
-    @GetMapping
-    public List<Sensor> findAllSensors() {
-        return sensorService.findAllSensors();
-    }
-
     @PostMapping("/start")
     public void startSensorDataSending() {
         sensorDataService.sendSensorDate();
@@ -44,7 +38,7 @@ public class Server {
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> saveSensor(@Valid @RequestBody Sensor sensor) {
         Sensor savedSensor = sensorService.saveSensor(sensor);
-        return Map.of("key", savedSensor.get_uuid());
+        return Map.of("key", savedSensor.getUuid());
     }
 
     @GetMapping("/{name}")
@@ -63,10 +57,35 @@ public class Server {
     }
 
     @PostMapping("/{key}/measurements")
-    public Measurement saveMeasurement(@RequestBody Measurement measurement, @PathVariable String key) {
-        return measurementService.saveMeasurement(measurement, key);
+    public ResponseEntity<?> saveMeasurement(@RequestBody Measurement measurement, @PathVariable String key) {
+        try {
+            sensorService.updateLastActiveTimestamp(key);
+            return ResponseEntity.ok().body(measurementService.saveMeasurement(measurement, key));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
+    @GetMapping
+    public ResponseEntity<?> getAllActiveSensors() {
+        return ResponseEntity.ok().body(sensorService.getAllActiveSensors());
+    }
+    @GetMapping("/{key}/measurements")
+    public ResponseEntity<?> getLatestMeasurements(@PathVariable("key") String key) {
+        try {
+            return ResponseEntity.ok().body(measurementService.getLatestMeasurements(key));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+    @GetMapping("/measurements")
+    public ResponseEntity<?> getAllCurrentMeasurements() {
+        try {
+            return ResponseEntity.ok().body(measurementService.getAllCurrentMeasurements());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
     @PostMapping("/{key}/measure")
     public ResponseEntity<String> addMeasurement(@PathVariable("key") String key, @Valid @RequestBody Measurement measurement) {
 

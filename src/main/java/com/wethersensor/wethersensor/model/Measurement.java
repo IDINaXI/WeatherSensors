@@ -1,9 +1,6 @@
 package com.wethersensor.wethersensor.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,15 +14,18 @@ public class Measurement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotNull
-    @Min(value = -100)
-    @Max(value = 100)
-    private double value;
-    @NotNull
-    private boolean raining;
-    private LocalDateTime timestamp;
+
     @ManyToOne
-    @JoinColumn(name = "sensors_id")
+    @JoinColumn(name = "sensor_id", nullable = false)
     private Sensor sensor;
+
+    @Column(nullable = false)
+    private double value;
+
+    @Column(nullable = false)
+    private boolean raining;
+
+    @Column(nullable = false)
+    private LocalDateTime timestamp;
 }
 

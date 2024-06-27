@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -23,13 +24,31 @@ public class MeasurementServiceImpl implements MeasurementService {
     @Override
     @Transactional
     public Measurement saveMeasurement(Measurement measurement, String sensorUuid) {
-        Sensor sensor = sensorsRepository.findSensorBy_uuid(sensorUuid);
+        Sensor sensor = sensorsRepository.findSensorByUuid(sensorUuid);
         if (sensor == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Сенсор не найден");
         }
+
         measurement.setSensor(sensor);
         measurement.setTimestamp(LocalDateTime.now());
         return measurementRepository.save(measurement);
+    }
+
+    @Override
+    public List<Measurement> getLatestMeasurements(String uuid) {
+        Sensor sensor = sensorsRepository.findSensorByUuid(uuid);
+        if (sensor == null) {
+            throw new IllegalArgumentException("Sensor with UUID '" + uuid + "' not found");
+        }
+
+        return measurementRepository.findTop20BySensorOrderByTimestampDesc(sensor);
+
+    }
+
+    @Override
+    public List<Measurement> getAllCurrentMeasurements() {
+        LocalDateTime timeThreshold = LocalDateTime.now().minusMinutes(1);
+        return measurementRepository.findCurrentMeasurements(timeThreshold);
     }
 
 }
