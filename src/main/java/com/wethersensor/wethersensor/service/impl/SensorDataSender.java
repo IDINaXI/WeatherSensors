@@ -54,7 +54,7 @@ public class SensorDataSender implements SensorDataService {
 
                         HttpResponse response = httpClient.execute(request);
                         int statusCode = response.getStatusLine().getStatusCode();
-                        System.out.println("Sensor " + sensorKey + " - HTTP Status Code: " + statusCode);
+                        System.out.println("Сенсор " + sensorKey + " - HTTP Status Code: " + statusCode);
 
                         if (statusCode != 201) {
                             System.err.println("Ответ при отправке данных для сенсора " + sensorKey + ": " + response.getStatusLine());

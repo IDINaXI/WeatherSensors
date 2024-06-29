@@ -38,7 +38,7 @@ public class MeasurementServiceImpl implements MeasurementService {
     public List<Measurement> getLatestMeasurements(String uuid) {
         Sensor sensor = sensorsRepository.findSensorByUuid(uuid);
         if (sensor == null) {
-            throw new IllegalArgumentException("Sensor with UUID '" + uuid + "' not found");
+            throw new IllegalArgumentException("Сенсор с этим UUID '" + uuid + "' не найден");
         }
 
         return measurementRepository.findTop20BySensorOrderByTimestampDesc(sensor);

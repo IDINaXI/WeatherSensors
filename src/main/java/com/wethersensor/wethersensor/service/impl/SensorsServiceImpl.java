@@ -29,7 +29,7 @@ public class SensorsServiceImpl implements SensorService {
     @Override
     public Sensor saveSensor(Sensor sensor) {
         if (repository.findSensorByName(sensor.getName()) != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sensor with name " + sensor.getName() + " already exists");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сенсор с именем " + sensor.getName() + " уже существует");
         }
         else {
             sensor.setUuid(UUID.randomUUID().toString());
