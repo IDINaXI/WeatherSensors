@@ -6,6 +6,8 @@ import com.wethersensor.wethersensor.repository.MeasurementRepository;
 import com.wethersensor.wethersensor.service.MeasurementService;
 import com.wethersensor.wethersensor.service.SensorDataService;
 import com.wethersensor.wethersensor.service.SensorService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RestController
 @RequestMapping("/api/v1/sensors")
 @AllArgsConstructor
+@Api("Сервер для управления приложением")
 public class Server {
 
     private final SensorService sensorService;
@@ -29,48 +32,13 @@ public class Server {
     @Autowired
     private final MeasurementRepository measurementRepository;
 
-    @PostMapping("/start")
-    public void startSensorDataSending() {
-        sensorDataService.sendSensorDate();
-    }
-
-    @PostMapping("/registration")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Map<String, String> saveSensor(@Valid @RequestBody Sensor sensor) {
-        Sensor savedSensor = sensorService.saveSensor(sensor);
-        return Map.of("key", savedSensor.getUuid());
-    }
-
-    @GetMapping("/{name}")
-    public Sensor findSensorByName(@PathVariable String name) {
-        return sensorService.findSensorByName(name);
-    }
-
-    @PutMapping("/update_sensor")
-    public Sensor updateSensor(@RequestBody Sensor sensor) {
-        return sensorService.updateSensor(sensor);
-    }
-
-    @DeleteMapping("/delete_sensor/{name}")
-    public void deleteSensor(@PathVariable String name) {
-        sensorService.deleteSensor(name);
-    }
-
-    @PostMapping("/{key}/measurements")
-    public ResponseEntity<?> saveMeasurement(@RequestBody Measurement measurement, @PathVariable String key) {
-        try {
-            sensorService.updateLastActiveTimestamp(key);
-            return ResponseEntity.ok().body(measurementService.saveMeasurement(measurement, key));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }
-
     @GetMapping
+    @ApiOperation("Вывод всех активных сенсоров")
     public ResponseEntity<?> getAllActiveSensors() {
         return ResponseEntity.ok().body(sensorService.getAllActiveSensors());
     }
     @GetMapping("/{key}/measurements")
+    @ApiOperation("Вывод последних 20 записей сенсора")
     public ResponseEntity<?> getLatestMeasurements(@PathVariable("key") String key) {
         try {
             return ResponseEntity.ok().body(measurementService.getLatestMeasurements(key));
@@ -79,6 +47,7 @@ public class Server {
         }
     }
     @GetMapping("/measurements")
+    @ApiOperation("Вывод актуальной информации от всех сенсоров")
     public ResponseEntity<?> getAllCurrentMeasurements() {
         try {
             return ResponseEntity.ok().body(measurementService.getAllCurrentMeasurements());
@@ -86,7 +55,26 @@ public class Server {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+    @GetMapping("/{name}")
+    @ApiOperation("Вывод сенсора по названию")
+    public Sensor findSensorByName(@PathVariable String name) {
+        return sensorService.findSensorByName(name);
+    }
+
+    @PostMapping("/start")
+    @ApiOperation("Симуляциях данных приходящих от сенсоров")
+    public void startSensorDataSending() {
+        sensorDataService.sendSensorDate();
+    }
+    @PostMapping("/registration")
+    @ApiOperation("Регистрация сенсора")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Map<String, String> saveSensor(@Valid @RequestBody Sensor sensor) {
+        Sensor savedSensor = sensorService.saveSensor(sensor);
+        return Map.of("key", savedSensor.getUuid());
+    }
     @PostMapping("/{key}/measure")
+    @ApiOperation("Сохранение данных от сенсора на сервер")
     public ResponseEntity<String> addMeasurement(@PathVariable("key") String key, @Valid @RequestBody Measurement measurement) {
 
         try {
@@ -103,5 +91,17 @@ public class Server {
         measurementRepository.save(measurement);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("Measurement added successfully");
+    }
+
+    @PutMapping("/update_sensor")
+    @ApiOperation("Обновление данных сессора")
+    public Sensor updateSensor(@RequestBody Sensor sensor) {
+        return sensorService.updateSensor(sensor);
+    }
+
+    @DeleteMapping("/delete_sensor/{name}")
+    @ApiOperation("Удаление данные сенсора по имени")
+    public void deleteSensor(@PathVariable String name) {
+        sensorService.deleteSensor(name);
     }
 }
